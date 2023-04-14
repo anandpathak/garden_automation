@@ -2,7 +2,6 @@
 
 #include "addons/TokenHelper.h"
 
-#include <ArduinoJson.h>
 
 #include "config.h"
 FirebaseData fbdo;
@@ -35,24 +34,22 @@ void FireStoreConnect() {
 
 }
 
-DynamicJsonDocument getDocument() {
+FirebaseJson getDocument() {
     String documentPath = "config";
     String mask = "";
-    DynamicJsonDocument doc(2000);
+
     if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), mask.c_str())) {
-          Serial.printf("ok\n%s\n %s\n", fbdo.jsonString().c_str(), fbdo.payload().c_str());
-          DeserializationError error  = deserializeJson(doc, fbdo.payload().c_str());
-          if (error) {
-            Serial.print(F("deserializeJson() failed: "));
-            Serial.println(error.f_str());
-            return doc;
-          }
-          return doc;
+          FirebaseJson json;
+          json.setJsonData(fbdo.payload());
+          json.toString(Serial,true);
+          
+          Serial.println();
+          Serial.println();
+          return json;
     }
     else{
       Serial.println(fbdo.errorReason());
     }     
-    return doc;
-}
-
+    return NULL;
+};
 
