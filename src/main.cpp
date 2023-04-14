@@ -4,12 +4,40 @@
 #include "wifi.h"
 #include "firebase.h"   
 #include "repository/remote_config.h"   
+#include "helper.h"
 
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
+
+void pumpOn(){
+  Serial.print("pump up now!!");
+  digitalWrite(D1,HIGH);
+  digitalWrite(LED_BUILTIN,HIGH);
+  delay(5000);
+  digitalWrite(D1,LOW);
+  digitalWrite(LED_BUILTIN,LOW);
+}
+
+void cronScheduled(int* cronTime, freqType frequency, NTPClient currTime) {
+  Serial.printf("timing: %d , freq: %d, timing: %s",cronTime[1], frequency, currTime.getFormattedTime().c_str());
+  Serial.printf("frequency == DAILY, %d, timing= %d, matches= %d",frequency == DAILY, currTime.getHours() , containsInt(cronTime, currTime.getHours()));
+  if (frequency == HOURLY && containsInt(cronTime, currTime.getMinutes())) {   
+    pumpOn();
+  } else if (frequency == DAILY && containsInt(cronTime, currTime.getHours())) {
+    pumpOn();
+  } else if (frequency == WEEKLY && containsInt(cronTime, currTime.getDay()) ) {
+    pumpOn();
+  }
+  return;
+}
+
+void sendHeartBeat(int heartbeatInterval) {
+  return;
+}
+
 void setup() {
   // put your setup code here, to run once:
   
@@ -24,29 +52,22 @@ void setup() {
 
 void loop() {
   
-  // put your main code here, to run repeatedly:
-  
   timeClient.update();
   Serial.println(timeClient.getFormattedTime());
+
+
   FirebaseJson doc = getDocument();
-  //const char* val = doc["documents"][0]["fields"]["Frequency"]["stringValue"];
   remoteConfig rc(doc);
-  int val = rc.LoopWindowInSecond();
-  int* timing = rc.TriggerTimeClockHours();
-  Serial.printf("TIMING ARRAY, %d",timing[0]);
 
-  // Serial.printf("value = %s", val);
-  delay(500000);
-
-  digitalWrite(D1,HIGH);
-  digitalWrite(LED_BUILTIN,HIGH);
+  int checkIntervalInSeconds = rc.LoopWindowInSecond();
+  int* cronTime = rc.TriggerTimeClockHours();
+  int heartbeatInterval = rc.HeartbeatWindowInSeconds();
+  freqType frequency = rc.Frequency();
   
-  delay(5000);
-  digitalWrite(LED_BUILTIN,LOW);
-  digitalWrite(D1,LOW);
-}
 
-void cronScheduled(char* cronTime, NTPClient currTime) {
+  sendHeartBeat(heartbeatInterval);
+  cronScheduled(cronTime,frequency,timeClient);
+  // Serial.printf("value = %s", val);
 
-
+  delay(checkIntervalInSeconds);
 }
