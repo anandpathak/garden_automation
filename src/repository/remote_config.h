@@ -15,6 +15,7 @@ class remoteConfig {
   int defaultTriggerTimeClockHour[10] = {9};
   int triggerTimeClockHour[10];
   int defaultDurationInSecond = 10;
+  int commandData[3];
   
 public:
   remoteConfig(FirebaseJson json);
@@ -24,6 +25,7 @@ public:
   freqType Frequency();
   int* TriggerTimeClockHours();
   int DurationInSecond();
+  int* Command();
 };
  
 #endif

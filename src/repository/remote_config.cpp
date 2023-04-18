@@ -82,7 +82,35 @@ int* remoteConfig::TriggerTimeClockHours(){
   }
   return defaultTriggerTimeClockHour;
 }
+
 int remoteConfig::DurationInSecond(){
-  return 1;
+   FirebaseJsonData result;
+  json.get(result, "documents/[0]/fields/"+DURATION_IN_SECOND_KEYS+"/integerValue");
+  if (result.success) {
+    return result.to<int>();
+  }
+  return defaultDurationInSecond;
 }
  
+
+
+// ["ENABLED? 0,1","PORT", "DURATION"]
+int* remoteConfig::Command(){
+  FirebaseJsonData result;
+  FirebaseJsonArray arr;
+  json.get(result, "documents/[0]/fields/"+COMMAND_KEYS+"/arrayValue/values");
+  if (result.success) {
+    result.get<FirebaseJsonArray>(arr);
+    for (size_t i = 0; i < arr.size(); i++){
+      FirebaseJson j;
+       arr.get(result, i);
+       result.get<FirebaseJson>(j);
+       j.get(result,"/integerValue");
+       if (result.success) {
+        commandData[i] = result.to<int>();
+       }
+    }
+    return commandData;
+  }
+  return NULL;
+}

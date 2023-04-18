@@ -8,5 +8,6 @@ static const std::string FREQUENCY_KEYS = "Frequency";
 static const std::string HEARTBEAT_WINDOW_IN_SECONDS_KEYS = "HeartbeatWindowInSeconds";
 static const std::string TRIGGER_TIME_CLOCK_HOUR_KEYS = "TriggerTimeClockHour";
 static const std::string VERSION_KEYS = "Version";
+static const std::string COMMAND_KEYS = "Command";
 
 #endif

@@ -53,3 +53,13 @@ FirebaseJson getDocument() {
     return NULL;
 };
 
+void createDocument( FirebaseJson content, char *documentId) {
+  if (!Firebase.ready()) {
+    Serial.printf("firebase not ready: %s", fbdo.payload().c_str());
+    return;
+  }
+  if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentId,  content.raw()))
+    Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+  else
+    Serial.println(fbdo.errorReason());
+}
